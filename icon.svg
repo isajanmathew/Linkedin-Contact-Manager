@@ -1,0 +1,50 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="90" fill="#0066cc" opacity="0.08"/>
+  
+  <!-- Main icon container centered properly -->
+  <g transform="translate(100, 100)">
+    
+    <!-- Network connection lines (behind everything) -->
+    <g opacity="0.4">
+      <line x1="-5" y1="-5" x2="25" y2="-28" stroke="#0066cc" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="5" y1="8" x2="28" y2="20" stroke="#0066cc" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="-10" y1="2" x2="-28" y2="0" stroke="#0066cc" stroke-width="2.5" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Contact card stack - centered -->
+    <g transform="translate(-30, -22)">
+      <!-- Back card (shadow) -->
+      <rect x="8" y="6" width="52" height="40" rx="3" fill="#0066cc" opacity="0.25"/>
+      
+      <!-- Middle card -->
+      <rect x="4" y="3" width="52" height="40" rx="3" fill="#0066cc" opacity="0.45"/>
+      
+      <!-- Front card -->
+      <rect x="0" y="0" width="52" height="40" rx="3" fill="#0066cc"/>
+      
+      <!-- Person icon on card -->
+      <circle cx="26" cy="13" r="5.5" fill="white"/>
+      <path d="M 15 28 Q 15 21 26 21 Q 37 21 37 28 L 37 33 L 15 33 Z" fill="white"/>
+      
+      <!-- Decorative lines at bottom -->
+      <line x1="8" y1="36" x2="44" y2="36" stroke="white" stroke-width="1.2" opacity="0.6" stroke-linecap="round"/>
+    </g>
+    
+    <!-- Network connection nodes (on top) -->
+    <g>
+      <!-- Top right node -->
+      <circle cx="32" cy="-32" r="7" fill="#0066cc"/>
+      <circle cx="32" cy="-32" r="3" fill="white"/>
+      
+      <!-- Bottom right node -->
+      <circle cx="36" cy="24" r="7" fill="#0066cc"/>
+      <circle cx="36" cy="24" r="3" fill="white"/>
+      
+      <!-- Left node -->
+      <circle cx="-36" cy="0" r="7" fill="#0066cc"/>
+      <circle cx="-36" cy="0" r="3" fill="white"/>
+    </g>
+    
+  </g>
+</svg>
