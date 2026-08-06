@@ -14,13 +14,96 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      contacts: {
+        Row: {
+          company: string | null
+          contact_date: string | null
+          created_at: string
+          deleted_at: string | null
+          email: string | null
+          follow_up_date: string | null
+          full_name: string | null
+          id: string
+          job_title: string | null
+          location: string | null
+          modified_at: string
+          notes: string | null
+          owner_key: string
+          phone: string | null
+          profile_picture: string | null
+          profile_url: string
+          tags: string[]
+        }
+        Insert: {
+          company?: string | null
+          contact_date?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          follow_up_date?: string | null
+          full_name?: string | null
+          id?: string
+          job_title?: string | null
+          location?: string | null
+          modified_at?: string
+          notes?: string | null
+          owner_key: string
+          phone?: string | null
+          profile_picture?: string | null
+          profile_url: string
+          tags?: string[]
+        }
+        Update: {
+          company?: string | null
+          contact_date?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          email?: string | null
+          follow_up_date?: string | null
+          full_name?: string | null
+          id?: string
+          job_title?: string | null
+          location?: string | null
+          modified_at?: string
+          notes?: string | null
+          owner_key?: string
+          phone?: string | null
+          profile_picture?: string | null
+          profile_url?: string
+          tags?: string[]
+        }
+        Relationships: []
+      }
+      sync_events: {
+        Row: {
+          changed_at: string
+          id: number
+          operation: string
+          owner_fingerprint: string
+          record_id: string
+        }
+        Insert: {
+          changed_at?: string
+          id?: number
+          operation: string
+          owner_fingerprint: string
+          record_id: string
+        }
+        Update: {
+          changed_at?: string
+          id?: number
+          operation?: string
+          owner_fingerprint?: string
+          record_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      request_owner_key: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
