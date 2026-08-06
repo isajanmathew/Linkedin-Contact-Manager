@@ -1,28 +1,15 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
 
+// The Chrome extension itself is assembled by build-extension.js.
+// Vite only builds the small static landing / install page in index.html.
 export default defineConfig({
-  plugins: [react()],
   server: {
-    port: 3000,
-    strictPort: true,
+    port: 8080,
     host: true,
     hmr: { overlay: false },
   },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
   build: {
-    outDir: 'dist',
-    rollupOptions: {
-      output: {
-        entryFileNames: '[name].js',
-        chunkFileNames: 'assets/[name].js',
-        assetFileNames: 'assets/[name].[ext]',
-      },
-    },
+    outDir: 'dist-web',
+    emptyOutDir: true,
   },
 })
