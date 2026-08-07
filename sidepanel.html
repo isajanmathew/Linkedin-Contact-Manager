@@ -30,164 +30,57 @@
       </div>
     </header>
 
-    <!-- Configuration Section -->
+    <!-- Sync Settings -->
     <section class="config-section">
       <button class="config-toggle" id="configToggle">
-        <span class="config-toggle__text">Airtable Configuration</span>
+        <span class="config-toggle__text">Sync Settings</span>
         <span class="config-toggle__icon">▼</span>
       </button>
-      
+
       <div class="config-content" id="configContent">
         <div class="field-group">
-          <label for="apiToken" class="field-label">API Token</label>
-          <input 
-            type="password" 
-            id="apiToken" 
-            class="field-input" 
-            placeholder="Enter your Airtable API token"
+          <label for="deviceKey" class="field-label">Device Key</label>
+          <input
+            type="password"
+            id="deviceKey"
+            class="field-input"
+            placeholder="Enter a long, private device key"
+            autocomplete="off"
           >
           <div class="field-hint">
-            Get your token from <a href="https://airtable.com/create/tokens" target="_blank">Airtable Tokens</a>
+            This key privately scopes your contacts. Use the same key on every device you want to
+            share contacts with, and keep it secret. Contacts are always saved on this device first.
           </div>
         </div>
-        
-        <div class="field-group">
-          <label for="baseId" class="field-label">Base ID</label>
-          <input 
-            type="text" 
-            id="baseId" 
-            class="field-input" 
-            placeholder="app..."
-          >
-        </div>
-        
-        <div class="field-group">
-          <label for="tableId" class="field-label">Table ID</label>
-          <input 
-            type="text" 
-            id="tableId" 
-            class="field-input" 
-            placeholder="tbl..."
-          >
-        </div>
-        
-        <!-- Field Mappings Section -->
-        <div class="field-mappings-section">
-          <h3 class="field-mappings__title">Field Mappings</h3>
-          <p class="field-mappings__description">
-            Map LinkedIn data to your Airtable column names. Leave blank to use defaults.
-          </p>
-          
-          <div class="mapping-grid">
-            <div class="mapping-item">
-              <label for="mapping-fullName" class="mapping-label">Full Name →</label>
-              <input type="text" id="mapping-fullName" class="field-input mapping-input" placeholder="Name">
-              <span class="field-type-badge" id="mapping-fullName-type"></span>
-              <div class="mapping-error" id="mapping-fullName-error"></div>
-            </div>
-            
-            <div class="mapping-item">
-              <label for="mapping-jobTitle" class="mapping-label">Job Title →</label>
-              <input type="text" id="mapping-jobTitle" class="field-input mapping-input" placeholder="Job Title">
-              <span class="field-type-badge" id="mapping-jobTitle-type"></span>
-              <div class="mapping-error" id="mapping-jobTitle-error"></div>
-            </div>
-            
-            <div class="mapping-item">
-              <label for="mapping-company" class="mapping-label">Company →</label>
-              <input type="text" id="mapping-company" class="field-input mapping-input" placeholder="Company">
-              <span class="field-type-badge" id="mapping-company-type"></span>
-              <div class="mapping-error" id="mapping-company-error"></div>
-            </div>
-            
-            <div class="mapping-item">
-              <label for="mapping-location" class="mapping-label">Location →</label>
-              <input type="text" id="mapping-location" class="field-input mapping-input" placeholder="Location">
-              <span class="field-type-badge" id="mapping-location-type"></span>
-              <div class="mapping-error" id="mapping-location-error"></div>
-            </div>
-            
-            <div class="mapping-item">
-              <label for="mapping-profileUrl" class="mapping-label">LinkedIn URL →</label>
-              <input type="text" id="mapping-profileUrl" class="field-input mapping-input" placeholder="LinkedIn URL">
-              <span class="field-type-badge" id="mapping-profileUrl-type"></span>
-              <div class="mapping-error" id="mapping-profileUrl-error"></div>
-            </div>
 
-            <div class="mapping-item">
-              <label for="mapping-profilePicture" class="mapping-label">Profile Picture →</label>
-              <input type="text" id="mapping-profilePicture" class="field-input mapping-input" placeholder="Profile Picture">
-              <span class="field-type-badge" id="mapping-profilePicture-type"></span>
-              <div class="mapping-error" id="mapping-profilePicture-error"></div>
-            </div>
-
-            <div class="mapping-item">
-              <label for="mapping-email" class="mapping-label">Email →</label>
-              <input type="text" id="mapping-email" class="field-input mapping-input" placeholder="Email">
-              <span class="field-type-badge" id="mapping-email-type"></span>
-              <div class="mapping-error" id="mapping-email-error"></div>
-            </div>
-            
-            <div class="mapping-item">
-              <label for="mapping-phone" class="mapping-label">Phone →</label>
-              <input type="text" id="mapping-phone" class="field-input mapping-input" placeholder="Phone">
-              <span class="field-type-badge" id="mapping-phone-type"></span>
-              <div class="mapping-error" id="mapping-phone-error"></div>
-            </div>
-            
-            <div class="mapping-item">
-              <label for="mapping-tags" class="mapping-label">Tags →</label>
-              <input type="text" id="mapping-tags" class="field-input mapping-input" placeholder="Tags">
-              <span class="field-type-badge" id="mapping-tags-type"></span>
-              <div class="mapping-error" id="mapping-tags-error"></div>
-            </div>
-            
-            <div class="mapping-item">
-              <label for="mapping-notes" class="mapping-label">Notes →</label>
-              <input type="text" id="mapping-notes" class="field-input mapping-input" placeholder="Notes">
-              <span class="field-type-badge" id="mapping-notes-type"></span>
-              <div class="mapping-error" id="mapping-notes-error"></div>
-            </div>
-
-            <div class="mapping-item">
-              <label for="mapping-contactDate" class="mapping-label">Last Catchup →</label>
-              <input type="text" id="mapping-contactDate" class="field-input mapping-input" placeholder="Last Catchup">
-              <span class="field-type-badge" id="mapping-contactDate-type"></span>
-              <div class="mapping-error" id="mapping-contactDate-error"></div>
-            </div>
-
-            <div class="mapping-item">
-              <label for="mapping-followUpDate" class="mapping-label">Follow Up On →</label>
-              <input type="text" id="mapping-followUpDate" class="field-input mapping-input" placeholder="Follow Up On">
-              <span class="field-type-badge" id="mapping-followUpDate-type"></span>
-              <div class="mapping-error" id="mapping-followUpDate-error"></div>
-            </div>
-          </div>
-          
-          <button type="button" class="btn btn--secondary" id="testMappings">
-            Test Field Mappings
-          </button>
-        </div>
-
-        <!-- Tag Info Section -->
         <div class="tag-info-section">
-          <h3 class="tag-info__title">Airtable Tags</h3>
-          <p class="tag-info__description">
-            Tags are pulled from your Airtable multi-select field. Add new options in Airtable to see them here.
-          </p>
-          <div class="tag-stats" id="tagStats">
+          <h3 class="tag-info__title">Sync Status</h3>
+          <div class="tag-stats" id="syncStats">
             <div class="tag-stat">
-              <span class="tag-stat__label">Available Tags:</span>
+              <span class="tag-stat__label">Pending changes:</span>
+              <span class="tag-stat__value" id="pendingCount">0</span>
+            </div>
+            <div class="tag-stat">
+              <span class="tag-stat__label">Last synced:</span>
+              <span class="tag-stat__value" id="lastSynced">Never</span>
+            </div>
+            <div class="tag-stat">
+              <span class="tag-stat__label">Saved tags:</span>
               <span class="tag-stat__value" id="totalTags">0</span>
             </div>
           </div>
+          <div class="field-error" id="syncError"></div>
         </div>
 
         <button class="btn btn--secondary" id="saveConfig">
-          Save Configuration
+          Save Device Key
+        </button>
+        <button type="button" class="btn btn--secondary" id="syncNow">
+          Sync Now
         </button>
       </div>
     </section>
+
 
     <!-- Profile Picture Preview -->
     <div class="profile-picture-section">
