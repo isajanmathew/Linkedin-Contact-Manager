@@ -41,6 +41,7 @@ await build({
   },
   build: {
     outDir: distDir,
+    copyPublicDir: false,
     emptyOutDir: false,
     target: 'chrome114',
     minify: false,
