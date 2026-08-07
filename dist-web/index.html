@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LinkedIn Contact Saver — Supabase-synced Chrome extension</title>
+    <meta
+      name="description"
+      content="A Manifest V3 Chrome extension that captures LinkedIn profiles into a local-first store and syncs them to Supabase in real time."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="LinkedIn Contact Saver — Supabase-synced Chrome extension" />
+    <meta
+      property="og:description"
+      content="Capture LinkedIn profiles offline-first, then sync to Supabase over Realtime with timestamp-based conflict handling."
+    />
+    <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/assets/favicon-rRer0nyP.svg" />
+    <style>
+      :root {
+        --bg: #07090c;
+        --panel: #101319;
+        --line: #1e2430;
+        --ink: #e8ecf2;
+        --muted: #8b96a8;
+        --accent: #3ecf8e;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.6;
+      }
+      main { max-width: 720px; margin: 0 auto; padding: 72px 24px 96px; }
+      .eyebrow {
+        font-size: 12px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      h1 { font-size: 34px; line-height: 1.2; margin: 12px 0 8px; }
+      p.lead { color: var(--muted); font-size: 17px; margin-top: 0; }
+      section {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 22px 24px;
+        margin-top: 24px;
+      }
+      h2 { font-size: 15px; margin: 0 0 12px; letter-spacing: 0.02em; }
+      ol, ul { margin: 0; padding-left: 20px; color: var(--muted); }
+      li { margin-bottom: 8px; }
+      code {
+        background: #0a0d12;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 1px 6px;
+        font-size: 13px;
+        color: var(--ink);
+      }
+      footer { color: #55606f; font-size: 13px; margin-top: 32px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Chrome Extension · Manifest V3</p>
+      <h1>LinkedIn Contact Saver</h1>
+      <p class="lead">
+        Captures LinkedIn profiles into <code>chrome.storage.local</code> instantly, then syncs them to
+        Supabase in the background over Realtime.
+      </p>
+
+      <section>
+        <h2>Load the extension</h2>
+        <ol>
+          <li>Run <code>npm run build:extension</code> to assemble the <code>dist/</code> folder.</li>
+          <li>Open <code>chrome://extensions</code>.</li>
+          <li>Enable <strong>Developer mode</strong> (top right).</li>
+          <li>Click <strong>Load unpacked</strong> and select the <code>dist/</code> folder.</li>
+          <li>Open the side panel on any <code>linkedin.com/in/…</code> profile.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>First-run setup</h2>
+        <ul>
+          <li>Open the side panel and expand <strong>Sync settings</strong>.</li>
+          <li>Paste your device key — the shared secret that scopes your rows in Supabase.</li>
+          <li>Everything else works offline; pending changes flush automatically once reachable.</li>
+        </ul>
+      </section>
+
+      <footer>Local-first storage · debounced writes · Realtime pull · timestamp conflict resolution</footer>
+    </main>
+  </body>
+</html>
