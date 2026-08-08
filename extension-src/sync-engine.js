@@ -110,14 +110,48 @@ export async function flushOutbox() {
           if (error) throw error;
           await markSynced(op.contactId, new Date().toISOString());
         } else {
-          const { data, error } = await supabase
+          const row = toRow(contact, ownerKey);
+          // Update-then-insert instead of upsert: an upsert on
+          // (owner_key, profile_url) would rewrite the remote row's primary key
+          // with our local id, breaking record continuity for other devices.
+          // The modified_at filter is the conflict rule — a remote row edited
+          // more recently than our local copy wins and is pulled instead.
+          const { id: _localId, ...updatable } = row;
+          const { data: updated, error: updateError } = await supabase
             .from('contacts')
-            .upsert(toRow(contact, ownerKey), { onConflict: 'owner_key,profile_url' })
-            .select('id, modified_at')
-            .single();
-          if (error) throw error;
-          await markSynced(op.contactId, data.modified_at, data.id);
+            .update(updatable)
+            .eq('owner_key', ownerKey)
+            .eq('profile_url', row.profile_url)
+            .lte('modified_at', row.modified_at)
+            .select('id, modified_at');
+          if (updateError) throw updateError;
+
+          if (updated && updated.length > 0) {
+            await markSynced(op.contactId, updated[0].modified_at, updated[0].id);
+          } else {
+            const { data: existing, error: existingError } = await supabase
+              .from('contacts')
+              .select('id, modified_at')
+              .eq('owner_key', ownerKey)
+              .eq('profile_url', row.profile_url)
+              .maybeSingle();
+            if (existingError) throw existingError;
+
+            if (existing) {
+              // Remote is newer: discard this push and let the pull apply it.
+              await markSynced(op.contactId, existing.modified_at, existing.id);
+            } else {
+              const { data: inserted, error: insertError } = await supabase
+                .from('contacts')
+                .insert(row)
+                .select('id, modified_at')
+                .single();
+              if (insertError) throw insertError;
+              await markSynced(op.contactId, inserted.modified_at, inserted.id);
+            }
+          }
         }
+
         pushed += 1;
       } catch (error) {
         if (isTransient(error) && op.attempts + 1 < MAX_ATTEMPTS) {
