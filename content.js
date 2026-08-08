@@ -418,7 +418,7 @@ class LinkedInProfileExtractor {
   }
 
   /**
-   * Check if current profile is already saved in Airtable
+   * Check if current profile is already saved locally
    */
   async checkIfContactSaved() {
     const profileUrl = window.location.href;
@@ -2358,7 +2358,7 @@ class LinkedInProfileExtractor {
 
 // Initialize the extractor when script loads
 const extractor = new LinkedInProfileExtractor();
-window.linkedInAirtableExtractor = extractor;
+window.linkedInContactExtractor = extractor;
 
 // SPA navigation is handled by the persistent MutationObserver inside the class.
 // The 'contactSaved' message is handled inside setupMessageListener() — no duplicate
