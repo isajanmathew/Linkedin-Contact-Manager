@@ -97,8 +97,8 @@ class LinkedInProfileExtractor {
       }
 
       // Don't re-inject if already present
-      if (document.getElementById('linkedin-airtable-corner-container') || 
-          document.getElementById('linkedin-airtable-add-btn')) {
+      if (document.getElementById('linkedin-contact-saver-corner-container') || 
+          document.getElementById('linkedin-contact-saver-add-btn')) {
         return;
       }
 
@@ -132,14 +132,14 @@ class LinkedInProfileExtractor {
    * Inject CSS styles for the Add Contact button
    */
   injectButtonStyles() {
-    const styleId = 'linkedin-airtable-button-styles';
+    const styleId = 'linkedin-contact-saver-button-styles';
     if (document.getElementById(styleId)) return;
 
     const style = document.createElement('style');
     style.id = styleId;
     style.textContent = `
       /* Blue capsule button for profile card */
-      .linkedin-airtable-add-btn {
+      .linkedin-contact-saver-add-btn {
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -161,46 +161,46 @@ class LinkedInProfileExtractor {
         margin-left: 8px;
         flex-shrink: 0;
       }
-      .linkedin-airtable-add-btn:hover {
+      .linkedin-contact-saver-add-btn:hover {
         background: linear-gradient(135deg, #0052a3 0%, #004080 100%);
         transform: translateY(-1px);
         box-shadow: 0 2px 6px rgba(0, 102, 204, 0.4);
       }
-      .linkedin-airtable-add-btn:active {
+      .linkedin-contact-saver-add-btn:active {
         background: linear-gradient(135deg, #004080 0%, #003366 100%);
         transform: translateY(0);
       }
-      .linkedin-airtable-add-btn.saved {
+      .linkedin-contact-saver-add-btn.saved {
         background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         box-shadow: 0 1px 3px rgba(34, 197, 94, 0.3);
       }
-      .linkedin-airtable-add-btn.saved:hover {
+      .linkedin-contact-saver-add-btn.saved:hover {
         background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
         box-shadow: 0 2px 6px rgba(34, 197, 94, 0.4);
       }
-      .linkedin-airtable-add-btn.loading {
+      .linkedin-contact-saver-add-btn.loading {
         opacity: 0.85;
         pointer-events: none;
       }
-      .linkedin-airtable-add-btn svg {
+      .linkedin-contact-saver-add-btn svg {
         width: 14px;
         height: 14px;
         flex-shrink: 0;
       }
-      .linkedin-airtable-add-btn .btn-text {
+      .linkedin-contact-saver-add-btn .btn-text {
         display: inline;
         white-space: nowrap;
       }
-      .linkedin-airtable-add-btn .btn-spinner {
+      .linkedin-contact-saver-add-btn .btn-spinner {
         width: 14px;
         height: 14px;
         border: 2px solid rgba(255, 255, 255, 0.3);
         border-top-color: white;
         border-radius: 50%;
-        animation: linkedin-airtable-spin 0.8s linear infinite;
+        animation: linkedin-contact-saver-spin 0.8s linear infinite;
       }
       /* Floating fallback styles */
-      .linkedin-airtable-add-btn.floating {
+      .linkedin-contact-saver-add-btn.floating {
         position: fixed;
         bottom: 24px;
         right: 24px;
@@ -210,17 +210,17 @@ class LinkedInProfileExtractor {
         border-radius: 20px;
         box-shadow: 0 4px 16px rgba(0, 102, 204, 0.35), 0 2px 4px rgba(0, 0, 0, 0.1);
       }
-      .linkedin-airtable-add-btn.floating:hover {
+      .linkedin-contact-saver-add-btn.floating:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0, 102, 204, 0.45), 0 4px 8px rgba(0, 0, 0, 0.15);
       }
       /* Inline container near premium icon */
-      .linkedin-airtable-inline-container {
+      .linkedin-contact-saver-inline-container {
         display: inline-flex;
         align-items: center;
         margin-left: 8px;
       }
-      @keyframes linkedin-airtable-spin {
+      @keyframes linkedin-contact-saver-spin {
         to { transform: rotate(360deg); }
       }
     `;
@@ -242,7 +242,7 @@ class LinkedInProfileExtractor {
 
     // Create button element
     const button = document.createElement('button');
-    button.id = 'linkedin-airtable-add-btn';
+    button.id = 'linkedin-contact-saver-add-btn';
     button.setAttribute('data-tooltip', 'Add Contact');
     button.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -271,7 +271,7 @@ class LinkedInProfileExtractor {
       return;
     }
 
-    button.className = 'linkedin-airtable-add-btn';
+    button.className = 'linkedin-contact-saver-add-btn';
     log('✅ Add Contact button injected in profile card corner');
 
     // Check if contact already saved and update button state
@@ -290,8 +290,8 @@ class LinkedInProfileExtractor {
 
     const makeContainer = () => {
       const container = document.createElement('div');
-      container.className = 'linkedin-airtable-inline-container';
-      container.id = 'linkedin-airtable-corner-container';
+      container.className = 'linkedin-contact-saver-inline-container';
+      container.id = 'linkedin-contact-saver-corner-container';
       container.style.display = 'inline-flex';
       container.style.alignItems = 'center';
       container.style.marginLeft = '8px';
@@ -309,7 +309,7 @@ class LinkedInProfileExtractor {
     ];
     for (const sel of actionRowSelectors) {
       const row = mainContent.querySelector(sel);
-      if (row && row.querySelector('button') && !row.querySelector('#linkedin-airtable-corner-container')) {
+      if (row && row.querySelector('button') && !row.querySelector('#linkedin-contact-saver-corner-container')) {
         row.appendChild(makeContainer());
         log('✅ Injected button in action row: ' + sel);
         return true;
@@ -334,7 +334,7 @@ class LinkedInProfileExtractor {
         parentRow = parentRow.parentElement;
       }
 
-      if (parentRow && !parentRow.querySelector('#linkedin-airtable-corner-container')) {
+      if (parentRow && !parentRow.querySelector('#linkedin-contact-saver-corner-container')) {
         parentRow.appendChild(makeContainer());
         log('✅ Injected button next to action buttons (text match)');
         return true;
@@ -345,7 +345,7 @@ class LinkedInProfileExtractor {
     const moreBtn = mainContent.querySelector('.artdeco-dropdown--placement-bottom, .artdeco-dropdown');
     if (moreBtn) {
       const parentRow = moreBtn.parentElement;
-      if (parentRow && !parentRow.querySelector('#linkedin-airtable-corner-container')) {
+      if (parentRow && !parentRow.querySelector('#linkedin-contact-saver-corner-container')) {
         moreBtn.insertAdjacentElement('afterend', makeContainer());
         log('✅ Injected button after more-actions dropdown');
         return true;
@@ -356,7 +356,7 @@ class LinkedInProfileExtractor {
     const nameHeading = mainContent.querySelector('a > h1, h1.text-heading-xlarge, h1');
     if (nameHeading) {
       const nameRow = nameHeading.closest('.pv-text-details__left-panel, .ph5') || nameHeading.parentElement;
-      if (nameRow && !nameRow.querySelector('#linkedin-airtable-corner-container')) {
+      if (nameRow && !nameRow.querySelector('#linkedin-contact-saver-corner-container')) {
         const container = makeContainer();
         container.style.marginLeft = '12px';
         container.style.display = 'inline-flex';
@@ -374,11 +374,11 @@ class LinkedInProfileExtractor {
    * Remove the Add Contact button from the page
    */
   removeAddContactButton() {
-    const existing = document.getElementById('linkedin-airtable-add-btn');
+    const existing = document.getElementById('linkedin-contact-saver-add-btn');
     if (existing) {
       existing.remove();
     }
-    const existingContainer = document.getElementById('linkedin-airtable-corner-container');
+    const existingContainer = document.getElementById('linkedin-contact-saver-corner-container');
     if (existingContainer) {
       existingContainer.remove();
     }
@@ -388,7 +388,7 @@ class LinkedInProfileExtractor {
    * Handle Add Contact button click
    */
   async handleAddContactClick() {
-    const button = document.getElementById('linkedin-airtable-add-btn');
+    const button = document.getElementById('linkedin-contact-saver-add-btn');
     if (!button) return;
 
     // Set loading state
@@ -450,7 +450,7 @@ class LinkedInProfileExtractor {
    * Update the button visual state
    */
   updateButtonState(state) {
-    const button = document.getElementById('linkedin-airtable-add-btn');
+    const button = document.getElementById('linkedin-contact-saver-add-btn');
     if (!button) return;
 
     // Remove all state classes
