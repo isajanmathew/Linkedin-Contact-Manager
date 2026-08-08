@@ -61,6 +61,24 @@
         font-size: 13px;
         color: var(--ink);
       }
+      .warn {
+        border-color: #4a2f16;
+        background: #1a1206;
+      }
+      .warn h2 { color: #f0b357; }
+      button {
+        appearance: none;
+        border: 0;
+        border-radius: 10px;
+        background: var(--accent);
+        color: #04170f;
+        font: inherit;
+        font-weight: 700;
+        padding: 11px 18px;
+        cursor: pointer;
+        margin-top: 4px;
+      }
+      button:hover { filter: brightness(1.08); }
       footer { color: #55606f; font-size: 13px; margin-top: 32px; }
     </style>
   </head>
@@ -73,15 +91,36 @@
         Supabase in the background over Realtime.
       </p>
 
+      <section class="warn">
+        <h2>Load <code>dist/</code>, never <code>extension-src/</code></h2>
+        <ul>
+          <li>
+            <code>extension-src/</code> holds source modules only — it has no
+            <code>manifest.json</code>, so Chrome reports “Manifest file is missing or unreadable”.
+          </li>
+          <li>The loadable extension is assembled into <code>dist/</code> by the build script.</li>
+        </ul>
+      </section>
+
       <section>
-        <h2>Load the extension</h2>
+        <h2>Build and load</h2>
         <ol>
+          <li>Run <code>npm install</code> (or <code>bun install</code>).</li>
           <li>Run <code>npm run build:extension</code> to assemble the <code>dist/</code> folder.</li>
           <li>Open <code>chrome://extensions</code>.</li>
           <li>Enable <strong>Developer mode</strong> (top right).</li>
           <li>Click <strong>Load unpacked</strong> and select the <code>dist/</code> folder.</li>
           <li>Open the side panel on any <code>linkedin.com/in/…</code> profile.</li>
         </ol>
+      </section>
+
+      <section>
+        <h2>Prefer a pre-built zip?</h2>
+        <ul>
+          <li>Download it, unzip it, then <strong>Load unpacked</strong> the unzipped folder.</li>
+          <li>Available only when the build step packaged it with your Supabase credentials.</li>
+        </ul>
+        <button id="download">Download extension zip</button>
       </section>
 
       <section>
@@ -94,6 +133,26 @@
       </section>
 
       <footer>Local-first storage · debounced writes · Realtime pull · timestamp conflict resolution</footer>
+    </main>
+    <script>
+      document.getElementById('download').addEventListener('click', () => {
+        fetch('/linkedin-contact-saver.zip')
+          .then((res) => {
+            if (!res.ok) throw new Error('No packaged zip yet — run: npm run build:extension');
+            return res.blob();
+          })
+          .then((blob) => {
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'linkedin-contact-saver.zip';
+            a.click();
+            URL.revokeObjectURL(a.href);
+          })
+          .catch((err) => alert(err.message));
+      });
+    </script>
+  </body>
+</html>
     </main>
   </body>
 </html>

@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { build } from 'vite';
 import { loadEnv } from 'vite';
@@ -86,4 +87,48 @@ dirsToCopy.forEach((dir) => {
   console.log(`✓ Copied ${dir}/ directory`);
 });
 
-console.log('\n✅ Extension build complete! Load the "dist" folder in Chrome to test.');
+// Marker so it's obvious which folder Chrome expects.
+fs.writeFileSync(
+  path.join(distDir, 'README-LOAD-ME.txt'),
+  [
+    'LOAD THIS FOLDER IN CHROME.',
+    '',
+    'This "dist" folder is the built, loadable extension — it contains manifest.json.',
+    'Do NOT load "extension-src" (source modules only, no manifest) or the project root.',
+    '',
+    'Steps:',
+    '  1. Open chrome://extensions',
+    '  2. Enable "Developer mode" (top right)',
+    '  3. Click "Load unpacked" and select THIS folder',
+    '  4. Open a linkedin.com/in/... profile and open the side panel',
+    '',
+    'Rebuild after any code or Supabase credential change: npm run build:extension',
+    '',
+  ].join('\n'),
+);
+console.log('✓ Wrote README-LOAD-ME.txt');
+
+// Package a ready-to-load zip next to the landing page, when a zip binary exists.
+const publicDir = path.join(__dirname, 'public');
+const zipPath = path.join(publicDir, 'linkedin-contact-saver.zip');
+fs.mkdirSync(publicDir, { recursive: true });
+fs.rmSync(zipPath, { force: true });
+
+const zipCandidates = [
+  ['zip', ['-r', '-q', zipPath, '.']],
+  ['nix', ['run', 'nixpkgs#zip', '--', '-r', '-q', zipPath, '.']],
+];
+let zipped = false;
+for (const [cmd, args] of zipCandidates) {
+  const result = spawnSync(cmd, args, { cwd: distDir, stdio: 'ignore' });
+  if (!result.error && result.status === 0 && fs.existsSync(zipPath)) {
+    zipped = true;
+    console.log(`✓ Packaged public/linkedin-contact-saver.zip (via ${cmd})`);
+    break;
+  }
+}
+if (!zipped) {
+  console.warn('⚠ Skipped zip packaging (no "zip" binary available) — dist/ is still loadable.');
+}
+
+console.log('\n✅ Extension build complete! Load the "dist" folder in Chrome (not extension-src).');
