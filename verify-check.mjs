@@ -1,51 +1,36 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 import crypto from 'crypto';
+const env = Object.fromEntries(readFileSync('.env','utf8').split('\n').filter(l=>l.includes('=')).map(l=>{const i=l.indexOf('=');return [l.slice(0,i), l.slice(i+1).replace(/^"|"$/g,'')]}));
+const OWNER='verify-'+crypto.randomBytes(4).toString('hex');
+const mine=createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false},global:{headers:{'x-owner-key':OWNER}}});
+const other=createClient(env.VITE_SUPABASE_URL, env.VITE_SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:false},global:{headers:{'x-owner-key':'not-my-key'}}});
+const pu='https://www.linkedin.com/in/verify-'+Date.now();
 
-const env = Object.fromEntries(readFileSync('/dev-server/.env','utf8').split('\n')
-  .filter(l=>l.includes('=')).map(l=>{const i=l.indexOf('=');return [l.slice(0,i), l.slice(i+1).replace(/^"|"$/g,'')]}));
+// replicate sync-engine push: update-then-insert
+async function push(row){
+  const { id, ...updatable } = row;
+  const up = await mine.from('contacts').update(updatable).eq('owner_key',OWNER).eq('profile_url',row.profile_url).lte('modified_at',row.modified_at).select('id,modified_at');
+  if (up.error) return {err:up.error.message};
+  if (up.data.length) return {path:'update', ...up.data[0]};
+  const ex = await mine.from('contacts').select('id,modified_at').eq('owner_key',OWNER).eq('profile_url',row.profile_url).maybeSingle();
+  if (ex.error) return {err:ex.error.message};
+  if (ex.data) return {path:'remote-newer-skip', ...ex.data};
+  const ins = await mine.from('contacts').insert(row).select('id,modified_at').single();
+  if (ins.error) return {err:ins.error.message};
+  return {path:'insert', ...ins.data};
+}
 
-const url = env.VITE_SUPABASE_URL, key = env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const OWNER = 'verify-device-key-' + crypto.randomBytes(4).toString('hex');
-const mine = createClient(url, key, { auth:{persistSession:false}, global:{headers:{'x-owner-key':OWNER}} });
-const other = createClient(url, key, { auth:{persistSession:false}, global:{headers:{'x-owner-key':'someone-elses-key'}} });
-const nokey = createClient(url, key, { auth:{persistSession:false} });
-
-const profileUrl = 'https://www.linkedin.com/in/verify-' + Date.now();
-const id = crypto.randomUUID();
-
-// realtime: subscribe to my fingerprint before writing
-const fp = crypto.createHash('sha256').update(OWNER).digest('hex');
-let events = 0;
-const ch = mine.channel('t').on('postgres_changes',
-  { event:'INSERT', schema:'public', table:'sync_events', filter:`owner_fingerprint=eq.${fp}` },
-  () => { events++; }).subscribe();
-await new Promise(r=>setTimeout(r,2500));
-
-const row = { id, owner_key: OWNER, full_name:'Verify User', profile_url: profileUrl, tags:['alpha','beta'], modified_at: new Date().toISOString() };
-const ins = await mine.from('contacts').upsert(row, { onConflict:'owner_key,profile_url' }).select('id, modified_at').single();
-console.log('insert:', ins.error?.message || 'ok', ins.data?.id === id ? '(same id)' : ins.data?.id);
-
-// same profile url, new local uuid -> should merge into existing row
-const dupId = crypto.randomUUID();
-const dup = await mine.from('contacts').upsert({ ...row, id: dupId, full_name:'Verify Updated', modified_at:new Date().toISOString() }, { onConflict:'owner_key,profile_url' }).select('id, full_name, modified_at').single();
-console.log('upsert-merge:', dup.error?.message || `id=${dup.data.id === id ? 'reused existing' : 'NEW ('+dup.data.id+')'} name=${dup.data.full_name}`);
-
-console.log('modified_at advanced:', dup.data && dup.data.modified_at > ins.data.modified_at);
-
-const mineRead = await mine.from('contacts').select('id,tags').eq('id', id);
-console.log('own read:', mineRead.error?.message || `${mineRead.data.length} row, tags=${mineRead.data[0]?.tags}`);
-const otherRead = await other.from('contacts').select('id').eq('id', id);
-console.log('other-key read:', otherRead.error ? 'blocked: '+otherRead.error.message : `${otherRead.data.length} rows (expect 0)`);
-const noKeyRead = await nokey.from('contacts').select('id');
-console.log('no-key read:', noKeyRead.error ? 'blocked: '+noKeyRead.error.message : `${noKeyRead.data.length} rows (expect 0)`);
-const spoof = await other.from('contacts').update({ full_name:'HACKED' }).eq('id', id).select();
-console.log('cross-key update:', spoof.error ? 'blocked' : `${spoof.data.length} rows changed (expect 0)`);
-
-await new Promise(r=>setTimeout(r,2000));
-console.log('realtime markers received:', events);
-
-const del = await mine.from('contacts').delete().eq('id', id);
-console.log('delete:', del.error?.message || 'ok');
-await mine.removeChannel(ch);
+const localId = crypto.randomUUID();
+const base = { id: localId, owner_key:OWNER, full_name:'Verify User', profile_url:pu, tags:['alpha'], modified_at:new Date().toISOString() };
+const r1 = await push(base); console.log('1st push:', r1.err||`${r1.path} id=${r1.id===localId?'local id kept':'other'}`);
+const r2 = await push({ ...base, id: crypto.randomUUID(), full_name:'Verify Edited', tags:['alpha','beta'], modified_at:new Date(Date.now()+1000).toISOString() });
+console.log('2nd push (edit, new local id):', r2.err||`${r2.path} pk-stable=${r2.id===r1.id}`);
+const r3 = await push({ ...base, full_name:'Stale Edit', modified_at:new Date(Date.now()-60000).toISOString() });
+console.log('stale push:', r3.err||r3.path);
+const now = await mine.from('contacts').select('full_name,tags').eq('id',r1.id).single();
+console.log('final row:', now.error?.message||JSON.stringify(now.data), '(expect Verify Edited)');
+const o1 = await other.from('contacts').select('id').eq('id',r1.id); console.log('other-key read:', o1.data?.length, 'rows (expect 0)');
+const o2 = await other.from('contacts').update({full_name:'HACKED'}).eq('id',r1.id).select(); console.log('other-key update:', o2.data?.length ?? o2.error.message, 'rows (expect 0)');
+console.log('delete:', (await mine.from('contacts').delete().eq('id',r1.id)).error?.message||'ok');
 process.exit(0);
