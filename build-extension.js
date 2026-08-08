@@ -8,6 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { build } from 'vite';
 import { loadEnv } from 'vite';
