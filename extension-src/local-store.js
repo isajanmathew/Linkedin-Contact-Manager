@@ -16,6 +16,8 @@ export const KEYS = {
   meta: 'syncMeta',
   deviceKey: 'deviceKey',
   tagUsage: 'tagSuggestions',
+  supabaseUrl: 'supabaseUrl',
+  supabaseAnonKey: 'supabaseAnonKey',
 };
 
 const CONTACT_FIELDS = [
