@@ -291,6 +291,23 @@ export async function setDeviceKey(key) {
   return { success: !result.error, error: result.error, connected: !result.error };
 }
 
+/** Point the extension at a Supabase project (URL + publishable anon key). */
+export async function setConnection({ url, anonKey }) {
+  const { setConnection: persist, getDeviceKey: readKey } = await import('./local-store.js');
+  await persist({ url, anonKey });
+  resetSupabase();
+  await teardownRealtime();
+  await patchMeta({ lastPulledAt: null, lastError: null, connected: false });
+
+  const deviceKey = await readKey();
+  if (!deviceKey) return { success: true, connected: false, reason: 'no-device-key' };
+
+  const result = await pullChanges({ full: true });
+  await subscribeRealtime();
+  await flushOutbox();
+  return { success: !result.error, error: result.error, connected: !result.error };
+}
+
 /* ------------------------------ lifecycle ------------------------------ */
 
 export function notifyPanels() {
