@@ -235,7 +235,7 @@ export async function subscribeRealtime() {
   await teardownRealtime();
 
   const supabase = await getSupabase(ownerKey);
-  if (!supabase) return { skipped: true, reason: 'no-connection' };
+  if (!supabase) return;
   const fingerprint = await ownerFingerprint(ownerKey);
   subscribedKey = ownerKey;
 
