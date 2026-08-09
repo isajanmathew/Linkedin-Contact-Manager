@@ -84,7 +84,8 @@ export async function flushOutbox() {
   const ownerKey = await getDeviceKey();
   if (!ownerKey) return { skipped: true, reason: 'no-device-key' };
 
-  const supabase = getSupabase(ownerKey);
+  const supabase = await getSupabase(ownerKey);
+  if (!supabase) return { skipped: true, reason: 'no-connection' };
   let ops = await getOutbox();
   if (!ops.length) return { pushed: 0 };
 
@@ -186,7 +187,8 @@ export async function pullChanges({ full = false } = {}) {
   if (!ownerKey) return { skipped: true, reason: 'no-device-key' };
   if (!navigator.onLine) return { skipped: true, reason: 'offline' };
 
-  const supabase = getSupabase(ownerKey);
+  const supabase = await getSupabase(ownerKey);
+  if (!supabase) return { skipped: true, reason: 'no-connection' };
   const meta = await getMeta();
   const since = full ? null : meta.lastPulledAt;
 
@@ -232,7 +234,8 @@ export async function subscribeRealtime() {
 
   await teardownRealtime();
 
-  const supabase = getSupabase(ownerKey);
+  const supabase = await getSupabase(ownerKey);
+  if (!supabase) return { skipped: true, reason: 'no-connection' };
   const fingerprint = await ownerFingerprint(ownerKey);
   subscribedKey = ownerKey;
 
@@ -263,7 +266,7 @@ export async function subscribeRealtime() {
 
 export async function teardownRealtime() {
   if (channel) {
-    const supabase = getSupabase(subscribedKey);
+    const supabase = await getSupabase(subscribedKey);
     try {
       await supabase?.removeChannel(channel);
     } catch (error) {
