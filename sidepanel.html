@@ -32,6 +32,36 @@
 
       <div class="config-content" id="configContent">
         <div class="field-group">
+          <label for="supabaseUrl" class="field-label">Supabase Project URL</label>
+          <input
+            type="text"
+            id="supabaseUrl"
+            class="field-input"
+            placeholder="https://yourproject.supabase.co"
+            autocomplete="off"
+          >
+        </div>
+
+        <div class="field-group">
+          <label for="supabaseAnonKey" class="field-label">Publishable (anon) Key</label>
+          <input
+            type="password"
+            id="supabaseAnonKey"
+            class="field-input"
+            placeholder="eyJhbGciOi..."
+            autocomplete="off"
+          >
+          <div class="field-hint">
+            Found in Supabase → Project Settings → API. The anon key is safe to store here; row
+            level security keeps contacts scoped to your device key.
+          </div>
+        </div>
+
+        <button class="btn btn--secondary" id="saveConnection">
+          Save Connection
+        </button>
+
+        <div class="field-group">
           <label for="deviceKey" class="field-label">Device Key</label>
           <input
             type="password"
@@ -45,6 +75,7 @@
             share contacts with, and keep it secret. Contacts are always saved on this device first.
           </div>
         </div>
+
 
         <div class="tag-info-section">
           <h3 class="tag-info__title">Sync Status</h3>

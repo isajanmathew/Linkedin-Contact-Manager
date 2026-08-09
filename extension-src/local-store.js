@@ -16,6 +16,8 @@ export const KEYS = {
   meta: 'syncMeta',
   deviceKey: 'deviceKey',
   tagUsage: 'tagSuggestions',
+  supabaseUrl: 'supabaseUrl',
+  supabaseAnonKey: 'supabaseAnonKey',
 };
 
 const CONTACT_FIELDS = [
@@ -49,6 +51,23 @@ export async function getDeviceKey() {
 export async function setDeviceKey(key) {
   await set({ [KEYS.deviceKey]: (key || '').trim() });
 }
+
+/** Supabase Project URL + Publishable (anon) key, overridable by the user. */
+export async function getConnection() {
+  const data = await get([KEYS.supabaseUrl, KEYS.supabaseAnonKey]);
+  return {
+    url: data[KEYS.supabaseUrl] || '',
+    anonKey: data[KEYS.supabaseAnonKey] || '',
+  };
+}
+
+export async function setConnection({ url, anonKey }) {
+  await set({
+    [KEYS.supabaseUrl]: (url || '').trim().replace(/\/+$/, ''),
+    [KEYS.supabaseAnonKey]: (anonKey || '').trim(),
+  });
+}
+
 
 export async function getContactMap() {
   const data = await get([KEYS.contacts]);

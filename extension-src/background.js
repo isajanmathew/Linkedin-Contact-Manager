@@ -6,17 +6,20 @@
 import { log, logError } from './config.js';
 import {
   findContactByUrl,
+  getConnection,
   getDeviceKey,
   getMeta,
   getTagOptions,
   listContacts,
 } from './local-store.js';
+import { getDefaultConnection } from './supabase-client.js';
 import {
   deleteContact,
   flushOutbox,
   onAlarm,
   pullChanges,
   saveContact,
+  setConnection,
   setDeviceKey,
   startSync,
   subscribeRealtime,
@@ -25,12 +28,28 @@ import {
 async function handleMessage(request) {
   switch (request.action) {
     case 'getSyncState': {
-      const [meta, deviceKey] = await Promise.all([getMeta(), getDeviceKey()]);
-      return { success: true, ...meta, hasDeviceKey: Boolean(deviceKey), online: navigator.onLine };
+      const [meta, deviceKey, stored] = await Promise.all([
+        getMeta(),
+        getDeviceKey(),
+        getConnection(),
+      ]);
+      const defaults = getDefaultConnection();
+      return {
+        success: true,
+        ...meta,
+        hasDeviceKey: Boolean(deviceKey),
+        online: navigator.onLine,
+        supabaseUrl: stored.url || defaults.url || '',
+        hasAnonKey: Boolean(stored.anonKey || defaults.anonKey),
+      };
     }
+
+    case 'setConnection':
+      return setConnection({ url: request.url, anonKey: request.anonKey });
 
     case 'setDeviceKey':
       return setDeviceKey(request.deviceKey);
+
 
     case 'saveContact':
       return saveContact(request.data);

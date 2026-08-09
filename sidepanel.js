@@ -33,9 +33,14 @@ class SidePanelManager {
       this.saveDeviceKey();
     });
 
+    document.getElementById('saveConnection')?.addEventListener('click', () => {
+      this.saveConnection();
+    });
+
     document.getElementById('syncNow')?.addEventListener('click', () => {
       this.syncNow();
     });
+
 
     document.getElementById('contactForm').addEventListener('submit', (e) => {
       e.preventDefault();
@@ -138,7 +143,49 @@ class SidePanelManager {
       const input = document.getElementById('deviceKey');
       if (input) input.placeholder = 'Device key saved — enter a new one to replace';
     }
+
+    const urlInput = document.getElementById('supabaseUrl');
+    if (urlInput && state?.supabaseUrl) urlInput.value = state.supabaseUrl;
+
+    const keyInput = document.getElementById('supabaseAnonKey');
+    if (keyInput && state?.hasAnonKey) {
+      keyInput.placeholder = 'Anon key saved — enter a new one to replace';
+    }
   }
+
+  async saveConnection() {
+    const urlInput = document.getElementById('supabaseUrl');
+    const keyInput = document.getElementById('supabaseAnonKey');
+    const url = urlInput.value.trim();
+    const anonKey = keyInput.value.trim();
+
+    if (!/^https:\/\/.+/.test(url)) {
+      this.showAlert('Enter your Supabase Project URL (https://...)', 'error');
+      return;
+    }
+    if (!anonKey) {
+      this.showAlert('Enter the publishable (anon) key', 'error');
+      return;
+    }
+
+    this.updateStatus('Connecting...', 'loading');
+    const result = await chrome.runtime.sendMessage({ action: 'setConnection', url, anonKey });
+
+    if (result?.success) {
+      keyInput.value = '';
+      keyInput.placeholder = 'Anon key saved — enter a new one to replace';
+      this.showAlert(
+        result.connected
+          ? 'Connected to Supabase.'
+          : 'Connection saved. Add a device key to start syncing.',
+        'success',
+      );
+    } else {
+      this.showAlert(`Connection failed: ${result?.error || 'unknown error'}`, 'error');
+    }
+    await this.refreshSyncStatus();
+  }
+
 
   async saveDeviceKey() {
     const input = document.getElementById('deviceKey');
