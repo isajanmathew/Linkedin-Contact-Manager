@@ -33,9 +33,14 @@ class SidePanelManager {
       this.saveDeviceKey();
     });
 
+    document.getElementById('saveConnection')?.addEventListener('click', () => {
+      this.saveConnection();
+    });
+
     document.getElementById('syncNow')?.addEventListener('click', () => {
       this.syncNow();
     });
+
 
     document.getElementById('contactForm').addEventListener('submit', (e) => {
       e.preventDefault();
