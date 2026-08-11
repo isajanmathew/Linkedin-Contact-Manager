@@ -1,22 +1,15 @@
-import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 
 // The Chrome extension itself is assembled by build-extension.js.
 // Vite only builds the small static landing / install page in index.html.
 export default defineConfig({
-  resolve: {
-    alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url)),
-    },
-  },
   server: {
-    port: 3000,
-    strictPort: true,
+    port: 8080,
     host: true,
-    allowedHosts: true,
+    hmr: { overlay: false },
   },
   build: {
-    outDir: 'dist',
+    outDir: 'dist-web',
     emptyOutDir: true,
   },
 })
