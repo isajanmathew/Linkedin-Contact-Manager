@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.request_owner_key() TO anon, authenticated, service_role;
