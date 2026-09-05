@@ -29,7 +29,7 @@
     'Apprenticeship',
     'Seasonal',
     'Temporary',
-沒  ];
+];
 
   const REJECT_PATTERNS =
     /(reposted this|likes? this|commented on|recent activity|activity|followers?\b|celebrating|congratulat)/i;
