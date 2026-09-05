@@ -13,6 +13,7 @@ import {
   getDeviceKey,
   getMeta,
   getOutbox,
+  listContacts,
   markContactDeletedLocal,
   markSynced,
   patchMeta,
@@ -25,11 +26,49 @@ const MAX_ATTEMPTS = 8;
 const FLUSH_DEBOUNCE_MS = 400;
 const BACKOFF_ALARM = 'sync-retry';
 const HEARTBEAT_ALARM = 'sync-heartbeat';
+const REMINDER_CHECK_ALARM = 'sync-reminder-check';
 
 let channel = null;
 let subscribedKey = null;
 let flushTimer = null;
 let flushing = false;
+
+export async function updateBadge() {
+  try {
+    const contacts = await listContacts();
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const todayEnd = new Date(todayStr + 'T23:59:59.999Z');
+
+    let dueCount = 0;
+    contacts.forEach((contact) => {
+      if (contact.followUpDate) {
+        const followUp = new Date(contact.followUpDate + 'T23:59:59.999Z');
+        if (!isNaN(followUp.getTime()) && followUp <= todayEnd) {
+          dueCount++;
+        }
+      } else if (contact.quarterlyReminder !== false) {
+        const baseDateStr = contact.contactDate || contact.createdAt || contact.modifiedAt;
+        if (baseDateStr) {
+          const base = new Date(baseDateStr);
+          if (!isNaN(base.getTime())) {
+            const nextQuarter = new Date(base.getTime() + 90 * 24 * 60 * 60 * 1000);
+            if (nextQuarter <= todayEnd) {
+              dueCount++;
+            }
+          }
+        }
+      }
+    });
+
+    if (chrome.action && typeof chrome.action.setBadgeText === 'function') {
+      chrome.action.setBadgeText({ text: dueCount > 0 ? String(dueCount) : '' });
+      chrome.action.setBadgeBackgroundColor({ color: '#ea580c' });
+    }
+  } catch (err) {
+    logError('Failed to update badge', err);
+  }
+}
 
 function isTransient(error) {
   const message = String(error?.message || error || '').toLowerCase();
@@ -58,6 +97,7 @@ export async function saveContact(input) {
   const contact = await saveContactLocal(input);
   const pending = await enqueue('upsert', contact.id);
   scheduleFlush();
+  updateBadge().catch(logError);
   return { success: true, contact, pending };
 }
 
@@ -66,6 +106,7 @@ export async function deleteContact(id) {
   if (!contact) return { success: false, error: 'Contact not found' };
   await enqueue('delete', id);
   scheduleFlush();
+  updateBadge().catch(logError);
   return { success: true };
 }
 
@@ -237,10 +278,23 @@ export async function subscribeRealtime() {
   const supabase = await getSupabase(ownerKey);
   if (!supabase) return;
   const fingerprint = await ownerFingerprint(ownerKey);
+  const topicName = `contacts-sync-${fingerprint.slice(0, 12)}`;
+
+  // Clean up any existing channel with the same topic to avoid duplicate binding errors
+  const existingChannels = supabase.getChannels ? supabase.getChannels() : [];
+  const existing = existingChannels.find((c) => c.topic === `realtime:${topicName}`);
+  if (existing) {
+    try {
+      await supabase.removeChannel(existing);
+    } catch (e) {
+      warn('removeChannel existing failed', e);
+    }
+  }
+
   subscribedKey = ownerKey;
 
   channel = supabase
-    .channel(`contacts-sync-${fingerprint.slice(0, 12)}`)
+    .channel(topicName)
     .on(
       'postgres_changes',
       {
@@ -318,8 +372,10 @@ export function notifyPanels() {
 
 export async function startSync() {
   await chrome.alarms.create(HEARTBEAT_ALARM, { periodInMinutes: 1 });
+  await chrome.alarms.create(REMINDER_CHECK_ALARM, { periodInMinutes: 30 });
   await subscribeRealtime();
   await flushOutbox();
+  await updateBadge();
 }
 
 /**
@@ -331,9 +387,12 @@ export async function onAlarm(alarm) {
   if (alarm.name === HEARTBEAT_ALARM) {
     if (!channel) await subscribeRealtime();
     await flushOutbox();
+  } else if (alarm.name === REMINDER_CHECK_ALARM) {
+    await updateBadge();
   } else if (alarm.name === BACKOFF_ALARM) {
     await subscribeRealtime();
     await flushOutbox();
     await pullChanges();
+    await updateBadge();
   }
 }

@@ -18,6 +18,7 @@ export const KEYS = {
   tagUsage: 'tagSuggestions',
   supabaseUrl: 'supabaseUrl',
   supabaseAnonKey: 'supabaseAnonKey',
+  defaultQuarterlyReminder: 'defaultQuarterlyReminder',
 };
 
 const CONTACT_FIELDS = [
@@ -33,6 +34,7 @@ const CONTACT_FIELDS = [
   'notes',
   'contactDate',
   'followUpDate',
+  'quarterlyReminder',
 ];
 
 async function get(keys) {
@@ -43,9 +45,21 @@ async function set(items) {
   return chrome.storage.local.set(items);
 }
 
+export async function getDefaultQuarterlySetting() {
+  const data = await get([KEYS.defaultQuarterlyReminder]);
+  return data[KEYS.defaultQuarterlyReminder] !== undefined ? Boolean(data[KEYS.defaultQuarterlyReminder]) : true;
+}
+
+export async function setDefaultQuarterlySetting(enabled) {
+  await set({ [KEYS.defaultQuarterlyReminder]: Boolean(enabled) });
+}
+
 export async function getDeviceKey() {
   const data = await get([KEYS.deviceKey]);
-  return data[KEYS.deviceKey] || '';
+  if (data[KEYS.deviceKey]) return data[KEYS.deviceKey];
+  const defaultKey = 'default_device';
+  await set({ [KEYS.deviceKey]: defaultKey });
+  return defaultKey;
 }
 
 export async function setDeviceKey(key) {
@@ -155,6 +169,14 @@ export async function saveContactLocal(input) {
   CONTACT_FIELDS.forEach((field) => {
     if (field === 'tags') {
       contact.tags = sanitizeTags(input.tags ?? existing?.tags ?? []);
+    } else if (field === 'quarterlyReminder') {
+      if (input.quarterlyReminder !== undefined) {
+        contact.quarterlyReminder = Boolean(input.quarterlyReminder);
+      } else if (existing?.quarterlyReminder !== undefined) {
+        contact.quarterlyReminder = Boolean(existing.quarterlyReminder);
+      } else {
+        contact.quarterlyReminder = true;
+      }
     } else if (input[field] !== undefined) {
       contact[field] = typeof input[field] === 'string' ? input[field].trim() : input[field];
     } else if (existing?.[field] !== undefined) {
@@ -324,6 +346,7 @@ export function toRow(contact, ownerKey) {
     notes: emptyToNull(contact.notes),
     contact_date: emptyToNull(contact.contactDate),
     follow_up_date: emptyToNull(contact.followUpDate),
+    quarterly_reminder: contact.quarterlyReminder !== false && contact.quarterlyReminder !== 'false',
     deleted_at: contact.deletedAt || null,
     modified_at: contact.modifiedAt,
   };
@@ -344,6 +367,7 @@ export function fromRow(row) {
     notes: row.notes || '',
     contactDate: row.contact_date || '',
     followUpDate: row.follow_up_date || '',
+    quarterlyReminder: row.quarterly_reminder !== false,
     createdAt: row.created_at,
     modifiedAt: row.modified_at,
     remoteModifiedAt: row.modified_at,

@@ -1,11 +1,11 @@
 {
   "name": "linkedin-supabase-contact-saver",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.2.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "node build-extension.js && vite build",
+    "dev": "vite --host 0.0.0.0 --port 3000",
+    "build": "vite build && node build-extension.js",
     "build:dev": "node build-extension.js && vite build --mode development",
     "build:extension": "node build-extension.js",
     "lint": "eslint .",
@@ -15,9 +15,15 @@
     "@supabase/supabase-js": "^2.112.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@lovable.dev/vite-plugin-dev-server-bridge": "^1.0.2",
     "@lovable.dev/vite-plugin-hmr-gate": "^1.5.0",
+    "eslint": "^10.8.1",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.9.0",
     "lovable-tagger": "^1.3.3",
+    "typescript-eslint": "^8.66.0",
     "vite": "^5.4.8"
   }
 }

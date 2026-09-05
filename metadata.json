@@ -1,0 +1,6 @@
+{
+  "name": "LinkedIn Contact Saver",
+  "description": "A Manifest V3 Chrome extension landing page & dashboard that captures LinkedIn profiles into local storage and syncs to Supabase in real time.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

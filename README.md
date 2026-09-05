@@ -1,4 +1,4 @@
-# LinkedIn Contact Saver (Chrome Extension, Manifest V3)
+# LinkedIn Connection Manager (Chrome Extension, Manifest V3)
 
 Captures LinkedIn profile data into `chrome.storage.local` instantly (local-first), then syncs it to
 your own Supabase database in the background over Realtime, with an offline outbox and
@@ -31,7 +31,7 @@ inlined into the service worker at build time.
 ## First-run setup
 
 1. Open a `linkedin.com/in/...` profile, then open the side panel.
-2. Expand **Sync settings** and paste your device key — the shared secret that scopes your rows in Supabase.
+2. Expand **Sync settings** and paste your Supabase Project URL and Publishable (anon) key.
 3. Save contacts as normal. Writes land locally first; pending changes flush automatically when online.
 
 ## Usage
@@ -69,7 +69,7 @@ Backend tables live in Supabase: `contacts` (row-level security scoped by owner 
   enabled, and reload the page.
 - **Profile data missing** — LinkedIn layout changes; the extractor has fallback selectors, so refresh
   or renavigate to the profile.
-- **Nothing syncing** — open Sync settings and check the device key, pending count, and last synced
+- **Nothing syncing** — open Sync settings and check your Supabase connection URL/Key, pending count, and last synced
   time; click **Sync Now**. Offline changes stay queued until reachable.
 - **Sync worked before but stopped after credential changes** — rebuild the extension and reload it in
   `chrome://extensions`.

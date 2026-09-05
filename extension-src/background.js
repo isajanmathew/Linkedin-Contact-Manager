@@ -7,10 +7,12 @@ import { log, logError } from './config.js';
 import {
   findContactByUrl,
   getConnection,
+  getDefaultQuarterlySetting,
   getDeviceKey,
   getMeta,
   getTagOptions,
   listContacts,
+  setDefaultQuarterlySetting,
 } from './local-store.js';
 import { getDefaultConnection } from './supabase-client.js';
 import {
@@ -23,15 +25,17 @@ import {
   setDeviceKey,
   startSync,
   subscribeRealtime,
+  updateBadge,
 } from './sync-engine.js';
 
 async function handleMessage(request) {
   switch (request.action) {
     case 'getSyncState': {
-      const [meta, deviceKey, stored] = await Promise.all([
+      const [meta, deviceKey, stored, defaultQuarterly] = await Promise.all([
         getMeta(),
         getDeviceKey(),
         getConnection(),
+        getDefaultQuarterlySetting(),
       ]);
       const defaults = getDefaultConnection();
       return {
@@ -41,7 +45,62 @@ async function handleMessage(request) {
         online: navigator.onLine,
         supabaseUrl: stored.url || defaults.url || '',
         hasAnonKey: Boolean(stored.anonKey || defaults.anonKey),
+        defaultQuarterlyReminder: defaultQuarterly,
       };
+    }
+
+    case 'getDefaultSettings': {
+      const defaultQuarterly = await getDefaultQuarterlySetting();
+      return { success: true, defaultQuarterlyReminder: defaultQuarterly };
+    }
+
+    case 'setDefaultSettings': {
+      if (request.defaultQuarterlyReminder !== undefined) {
+        await setDefaultQuarterlySetting(request.defaultQuarterlyReminder);
+      }
+      return { success: true };
+    }
+
+    case 'getDueReconnects': {
+      const contacts = await listContacts();
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+      const todayEnd = new Date(todayStr + 'T23:59:59.999Z');
+
+      const dueContacts = [];
+      contacts.forEach((contact) => {
+        if (contact.followUpDate) {
+          const followUp = new Date(contact.followUpDate + 'T23:59:59.999Z');
+          if (!isNaN(followUp.getTime()) && followUp <= todayEnd) {
+            dueContacts.push({
+              ...contact,
+              dueType: 'followUp',
+              dueDate: contact.followUpDate,
+            });
+          }
+        } else if (contact.quarterlyReminder !== false) {
+          const baseDateStr = contact.contactDate || contact.createdAt || contact.modifiedAt;
+          if (baseDateStr) {
+            const base = new Date(baseDateStr);
+            if (!isNaN(base.getTime())) {
+              const nextQuarter = new Date(base.getTime() + 90 * 24 * 60 * 60 * 1000);
+              if (nextQuarter <= todayEnd) {
+                dueContacts.push({
+                  ...contact,
+                  dueType: 'quarterly',
+                  dueDate: nextQuarter.toISOString().split('T')[0],
+                });
+              }
+            }
+          }
+        }
+      });
+      return { success: true, count: dueContacts.length, contacts: dueContacts };
+    }
+
+    case 'updateBadge': {
+      await updateBadge();
+      return { success: true };
     }
 
     case 'setConnection':
@@ -68,8 +127,9 @@ async function handleMessage(request) {
     // Used by the floating button injected on LinkedIn profiles.
     case 'checkContactExists': {
       const contact = await findContactByUrl(request.profileUrl);
-      const deviceKey = await getDeviceKey();
-      return { exists: Boolean(contact), configured: Boolean(deviceKey), id: contact?.id || null };
+      const conn = await getConnection();
+      const configured = Boolean((conn.url || getDefaultConnection().url) && (conn.anonKey || getDefaultConnection().anonKey));
+      return { exists: Boolean(contact), configured, id: contact?.id || null };
     }
 
     case 'getTagOptions':

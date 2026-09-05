@@ -108,27 +108,47 @@ fs.writeFileSync(
 );
 console.log('✓ Wrote README-LOAD-ME.txt');
 
-// Package a ready-to-load zip next to the landing page, when a zip binary exists.
+// Package a ready-to-load zip next to the landing page.
 const publicDir = path.join(__dirname, 'public');
 const zipPath = path.join(publicDir, 'linkedin-contact-saver.zip');
 fs.mkdirSync(publicDir, { recursive: true });
 fs.rmSync(zipPath, { force: true });
 
-const zipCandidates = [
-  ['zip', ['-r', '-q', zipPath, '.']],
-  ['nix', ['run', 'nixpkgs#zip', '--', '-r', '-q', zipPath, '.']],
-];
-let zipped = false;
-for (const [cmd, args] of zipCandidates) {
-  const result = spawnSync(cmd, args, { cwd: distDir, stdio: 'ignore' });
-  if (!result.error && result.status === 0 && fs.existsSync(zipPath)) {
-    zipped = true;
-    console.log(`✓ Packaged public/linkedin-contact-saver.zip (via ${cmd})`);
-    break;
-  }
-}
-if (!zipped) {
-  console.warn('⚠ Skipped zip packaging (no "zip" binary available) — dist/ is still loadable.');
+// Use Python's built-in zipfile (guaranteed available in this environment)
+const pyScript = `
+import zipfile, os
+dist_dir = os.path.abspath("${distDir.replace(/\\/g, '/')}")
+zip_path = os.path.abspath("${zipPath.replace(/\\/g, '/')}")
+with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    for root, dirs, files in os.walk(dist_dir):
+        for file in files:
+            if file.endswith('.zip'):
+                continue
+            full_path = os.path.join(root, file)
+            rel_path = os.path.relpath(full_path, dist_dir)
+            zipf.write(full_path, rel_path)
+print("✓ Packaged extension zip:", zip_path)
+`;
+
+const zipResult = spawnSync('python3', ['-c', pyScript], { stdio: 'inherit' });
+if (zipResult.status === 0 && fs.existsSync(zipPath)) {
+  console.log(`✓ Successfully created public/linkedin-contact-saver.zip (${(fs.statSync(zipPath).size / 1024).toFixed(1)} KB)`);
+  // Copy to dist and dist-web
+  fs.copyFileSync(zipPath, path.join(distDir, 'linkedin-contact-saver.zip'));
+} else {
+  console.warn('⚠ Could not create zip package.');
 }
 
-console.log('\n✅ Extension build complete! Load the "dist" folder in Chrome (not extension-src).');
+// Also sync extension into dist-web/extension and dist-web/ if dist-web exists
+const distWebExtension = path.join(__dirname, 'dist-web', 'extension');
+if (fs.existsSync(path.join(__dirname, 'dist-web'))) {
+  fs.rmSync(distWebExtension, { recursive: true, force: true });
+  fs.mkdirSync(distWebExtension, { recursive: true });
+  fs.cpSync(distDir, distWebExtension, { recursive: true });
+  if (fs.existsSync(zipPath)) {
+    fs.copyFileSync(zipPath, path.join(__dirname, 'dist-web', 'linkedin-contact-saver.zip'));
+  }
+  console.log('✓ Synced extension copy to dist-web/extension/ and dist-web/linkedin-contact-saver.zip');
+}
+
+console.log('\n✅ Extension build complete! Load the "dist" folder in Chrome (not extension-src or dist-web).');
