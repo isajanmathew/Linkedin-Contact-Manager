@@ -608,8 +608,18 @@ class LinkedInProfileExtractor {
 
         const fullName = this.extractFullName();
         this.sendProgress('Extracting details...', 'loading');
-        let jobTitle = this.extractJobTitle();
-        let company = this.extractCompany();
+
+        // v2.4.0: dedicated Experience-only scraper runs first.
+        let jobTitle = null;
+        let company = null;
+        if (typeof window !== 'undefined' && window.LinkedInExperienceScraper) {
+          const scraped = window.LinkedInExperienceScraper.extractMostRecent();
+          jobTitle = scraped.jobTitle || null;
+          company = scraped.company || null;
+          log('🧪 experience-scraper v2.4.0 result:', scraped);
+        }
+        if (!jobTitle) jobTitle = this.extractJobTitle();
+        if (!company) company = this.extractCompany();
 
         // 1. If jobTitle contains "at Company" or "@ Company", e.g. "Software Engineer at Google"
         if (jobTitle) {

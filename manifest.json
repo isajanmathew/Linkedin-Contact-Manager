@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "LinkedIn Connection Manager",
-  "version": "2.2.0",
+  "version": "2.4.0",
   "description": "Manage and capture LinkedIn profile data into a local-first connection store that syncs to your Supabase database in real time.",
 
   "permissions": [
@@ -29,7 +29,7 @@
         "https://linkedin.com/in/*",
         "https://www.linkedin.com/in/*"
       ],
-      "js": ["content.js"],
+      "js": ["experience-scraper.js", "content.js"],
       "run_at": "document_idle"
     }
   ],

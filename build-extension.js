@@ -17,7 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const distDir = path.join(__dirname, 'dist');
 
-const filesToCopy = ['manifest.json', 'content.js', 'sidepanel.html', 'sidepanel.js', 'styles.css'];
+const filesToCopy = ['manifest.json', 'experience-scraper.js', 'content.js', 'sidepanel.html', 'sidepanel.js', 'styles.css'];
 const dirsToCopy = ['icons'];
 
 if (fs.existsSync(distDir)) {
@@ -110,7 +110,7 @@ console.log('✓ Wrote README-LOAD-ME.txt');
 
 // Package a ready-to-load zip next to the landing page.
 const publicDir = path.join(__dirname, 'public');
-const zipPath = path.join(publicDir, 'linkedin-contact-saver.zip');
+const zipPath = path.join(publicDir, 'linkedin-contact-saver-v2.4.0.zip');
 fs.mkdirSync(publicDir, { recursive: true });
 fs.rmSync(zipPath, { force: true });
 
@@ -132,9 +132,9 @@ print("✓ Packaged extension zip:", zip_path)
 
 const zipResult = spawnSync('python3', ['-c', pyScript], { stdio: 'inherit' });
 if (zipResult.status === 0 && fs.existsSync(zipPath)) {
-  console.log(`✓ Successfully created public/linkedin-contact-saver.zip (${(fs.statSync(zipPath).size / 1024).toFixed(1)} KB)`);
+  console.log(`✓ Successfully created public/linkedin-contact-saver-v2.4.0.zip (${(fs.statSync(zipPath).size / 1024).toFixed(1)} KB)`);
   // Copy to dist and dist-web
-  fs.copyFileSync(zipPath, path.join(distDir, 'linkedin-contact-saver.zip'));
+  fs.copyFileSync(zipPath, path.join(distDir, 'linkedin-contact-saver-v2.4.0.zip'));
 } else {
   console.warn('⚠ Could not create zip package.');
 }
@@ -146,7 +146,7 @@ if (fs.existsSync(path.join(__dirname, 'dist-web'))) {
   fs.mkdirSync(distWebExtension, { recursive: true });
   fs.cpSync(distDir, distWebExtension, { recursive: true });
   if (fs.existsSync(zipPath)) {
-    fs.copyFileSync(zipPath, path.join(__dirname, 'dist-web', 'linkedin-contact-saver.zip'));
+    fs.copyFileSync(zipPath, path.join(__dirname, 'dist-web', 'linkedin-contact-saver-v2.4.0.zip'));
   }
   console.log('✓ Synced extension copy to dist-web/extension/ and dist-web/linkedin-contact-saver.zip');
 }

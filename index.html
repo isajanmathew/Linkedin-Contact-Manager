@@ -808,7 +808,7 @@
   <body>
     <main>
       <p class="eyebrow">Chrome Extension · Manifest V3</p>
-      <h1>LinkedIn Connection Manager <span style="font-size: 15px; vertical-align: middle; background: #2563eb; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: normal; margin-left: 8px;">v2.2.0</span></h1>
+      <h1>LinkedIn Connection Manager <span style="font-size: 15px; vertical-align: middle; background: #2563eb; color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: normal; margin-left: 8px;">v2.4.0</span></h1>
       <p class="lead">
         Captures LinkedIn profiles into <code>chrome.storage.local</code> instantly, then syncs them to
         Supabase in the background over Realtime.
@@ -841,9 +841,9 @@
         <h2>Prefer a pre-built zip?</h2>
         <ul>
           <li>Download it, unzip it, then <strong>Load unpacked</strong> the unzipped folder.</li>
-          <li>Contains Manifest V3 (v2.2.0) with clean experience-based extraction.</li>
+          <li>Contains Manifest V3 (v2.4.0) with clean experience-based extraction.</li>
         </ul>
-        <button id="download">Download extension zip (v2.2.0)</button>
+        <button id="download">Download extension zip (v2.4.0)</button>
       </section>
 
       <section>
@@ -859,7 +859,7 @@
     </main>
     <script>
       document.getElementById('download').addEventListener('click', () => {
-        fetch('/linkedin-contact-saver.zip')
+        fetch('/linkedin-contact-saver-v2.4.0.zip')
           .then((res) => {
             if (!res.ok) throw new Error('No packaged zip yet — run: npm run build:extension');
             return res.blob();
@@ -867,7 +867,7 @@
           .then((blob) => {
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'linkedin-contact-saver.zip';
+            a.download = 'linkedin-contact-saver-v2.4.0.zip';
             a.click();
             URL.revokeObjectURL(a.href);
           })
