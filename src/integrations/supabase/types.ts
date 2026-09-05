@@ -10,10 +10,82 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.15"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
+      connections: {
+        Row: {
+          avatar_url: string | null
+          connected_at: string | null
+          connection_degree: string | null
+          created_at: string | null
+          current_company: string | null
+          current_role: string | null
+          email: string | null
+          first_name: string | null
+          full_name: string
+          headline: string | null
+          id: string
+          is_starred: boolean | null
+          last_interaction_at: string | null
+          last_name: string | null
+          location: string | null
+          next_followup_at: string | null
+          phone: string | null
+          profile_url: string | null
+          relationship_status: string | null
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          connected_at?: string | null
+          connection_degree?: string | null
+          created_at?: string | null
+          current_company?: string | null
+          current_role?: string | null
+          email?: string | null
+          first_name?: string | null
+          full_name: string
+          headline?: string | null
+          id: string
+          is_starred?: boolean | null
+          last_interaction_at?: string | null
+          last_name?: string | null
+          location?: string | null
+          next_followup_at?: string | null
+          phone?: string | null
+          profile_url?: string | null
+          relationship_status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          connected_at?: string | null
+          connection_degree?: string | null
+          created_at?: string | null
+          current_company?: string | null
+          current_role?: string | null
+          email?: string | null
+          first_name?: string | null
+          full_name?: string
+          headline?: string | null
+          id?: string
+          is_starred?: boolean | null
+          last_interaction_at?: string | null
+          last_name?: string | null
+          location?: string | null
+          next_followup_at?: string | null
+          phone?: string | null
+          profile_url?: string | null
+          relationship_status?: string | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           company: string | null
@@ -74,6 +146,47 @@ export type Database = {
         }
         Relationships: []
       }
+      notes: {
+        Row: {
+          connection_id: string | null
+          content: string
+          created_at: string | null
+          created_by_extension: boolean | null
+          id: string
+          interaction_type: string | null
+          reminder_date: string | null
+          sentiment: string | null
+        }
+        Insert: {
+          connection_id?: string | null
+          content: string
+          created_at?: string | null
+          created_by_extension?: boolean | null
+          id: string
+          interaction_type?: string | null
+          reminder_date?: string | null
+          sentiment?: string | null
+        }
+        Update: {
+          connection_id?: string | null
+          content?: string
+          created_at?: string | null
+          created_by_extension?: boolean | null
+          id?: string
+          interaction_type?: string | null
+          reminder_date?: string | null
+          sentiment?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notes_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sync_events: {
         Row: {
           changed_at: string
@@ -122,12 +235,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -151,11 +264,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -176,11 +289,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -201,11 +314,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -218,11 +331,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
